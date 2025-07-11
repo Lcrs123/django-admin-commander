@@ -13,8 +13,10 @@ Commands: TypeAlias = set[CommandName] | Literal["__all__"]
 AdminCommandsSetting: TypeAlias = dict[AppName, Commands]
 """A dict whose keys are strings and values are either the literal "__all__" or an iterable of strings"""
 
+
 class CommandsImproperlyConfigured(ImproperlyConfigured):
     """Default ImproperlyConfigured exception"""
+
     def __init__(
         self,
         setting_values: str,

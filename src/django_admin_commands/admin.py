@@ -41,7 +41,9 @@ class CommandAdmin(ModelAdmin):
         else:
             form = CommandForm()
         context = dict(self.admin_site.each_context(request), form=form)
-        return TemplateResponse(request, "django_admin_commands/admin/run_command.html", context)
+        return TemplateResponse(
+            request, "django_admin_commands/admin/run_command.html", context
+        )
 
     def has_add_permission(self, request):
         return False

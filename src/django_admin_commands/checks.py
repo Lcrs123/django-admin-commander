@@ -21,7 +21,7 @@ class CommandNotFoundError(Error):
     ) -> None:
         super().__init__(
             f"Command '{command_name}' not found for app '{app_name}'",
-            hint=f"Avaliable commands for app '{app_name}' are {[command for command, app in get_commands().items() if app==app_name]}",
+            hint=f"Avaliable commands for app '{app_name}' are {[command for command, app in get_commands().items() if app == app_name]}",
             id=id,
         )
 
