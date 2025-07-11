@@ -2,6 +2,8 @@ import io
 
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.contrib.admin.models import LogEntry
+from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.messages import add_message
 from django.core.management import call_command
 from django.http.request import HttpRequest
@@ -35,8 +37,22 @@ class CommandAdmin(ModelAdmin):
                 try:
                     call_command(command, *args, stdout=output)
                     add_message(request, 20, f"Command output:\n{output.getvalue()}")
+                    LogEntry.objects.log_action(
+                        user_id=request.user.pk,
+                        content_type_id=get_content_type_for_model(DummyCommandModel).id,
+                        object_id="",
+                        object_repr=f"Successfully executed '{command}' with args {args}",
+                        action_flag=1, # use action_flag 1 (ADDITION) to show default green '+' django icon on actions log
+                    )
                 except Exception as e:
                     add_message(request, 30, f"Error: {e}")
+                    LogEntry.objects.log_action(
+                        user_id=request.user.pk,
+                        content_type_id=get_content_type_for_model(DummyCommandModel).id,
+                        object_id="",
+                        object_repr=f"Error running '{command}' with args {args}",
+                        action_flag=3, # use action_flag 3 (DELETION) to show default red 'X' django icon on actions log
+                    )
                 return redirect("admin:run-command")
         else:
             form = CommandForm()
