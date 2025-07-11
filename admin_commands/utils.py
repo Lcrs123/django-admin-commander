@@ -10,7 +10,8 @@ from .consts import ADMIN_COMMANDS_SETTINGS_HINT, ADMIN_COMMANDS_SETTINGS_NAME
 AppName: TypeAlias = str
 CommandName: TypeAlias = str
 Commands: TypeAlias = set[CommandName] | Literal["__all__"]
-
+AdminCommandsSetting: TypeAlias = dict[AppName, Commands]
+"""A dict whose keys are strings and values are either the literal "__all__" or an iterable of strings"""
 
 class CommandsImproperlyConfigured(ImproperlyConfigured):
     """Default ImproperlyConfigured exception"""
@@ -32,7 +33,7 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
 def get_admin_commands(
     settings: LazySettings = settings,
     admin_commands_settings_name: str = ADMIN_COMMANDS_SETTINGS_NAME,
-) -> dict[AppName, Commands]:
+) -> AdminCommandsSetting:
     """Returns the value of the setting with the name defined in ADMIN_COMMANDS_SETTINGS_NAME or an empty dict if not defined.
 
     Caches and returns the cached value after the first run
