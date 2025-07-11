@@ -28,10 +28,10 @@ def get_valid_command_choices(
 
 
 VALID_COMMAND_CHOICES = get_valid_command_choices()
-OPT_GROUPS = {
+OPT_GROUPS:dict[AppName, list[str]] = {
     app: [] for app, _ in VALID_COMMAND_CHOICES
 }  # Using defaultdict does not work when iterating from template for some reason
-"""Mapping from App to enabled commands. Used in template to group select options with optgroup html tag"""
+"""Mapping from App to list of enabled commands. Used in template to group select options with optgroup html tag"""
 for app, command in VALID_COMMAND_CHOICES:
     OPT_GROUPS[app].append(command)
 
@@ -44,6 +44,13 @@ class CommandForm(forms.Form):
     )
     args = forms.CharField(label="Arguments (optional)", required=False)
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, optgroups:dict[AppName, list[str]]=OPT_GROUPS, **kwargs) -> None:
+        """Returns an instance of the form.
+
+        Stores the value of optgroups in the form field 'command', which can be accessed in templates with 'form.command.optgroups'
+
+        Args:
+            optgroups (dict[AppName, list[str]], optional): Mapping from App to list of enabled commands. Defaults to OPT_GROUPS.
+        """
         super().__init__(*args, **kwargs)
-        self["command"].optgroups = deepcopy(OPT_GROUPS) # Deepcopy just to be sure and prevent any django strangeness from accidentally messing with the original dict in successive instantiations.
+        self["command"].optgroups = deepcopy(optgroups) # Deepcopy just to be sure and prevent any django strangeness from accidentally messing with the original dict in successive instantiations.
