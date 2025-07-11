@@ -2,28 +2,36 @@
 {% block content %}
   <h1>Run Management Command</h1>
   <form method="post">{% csrf_token %}
-    {% with field=form.command %}
-    <div style="display: inline-grid;">
-      <div>
-        {{field.label_tag}}
-        <select name="{{field.name}}" id="{{field.id_for_label}}" {% if field.field.required %}required{% endif %}>
-          <option value="">Choose a command</option>
-          {% for group,options in field.optgroups.items %}
-            <optgroup label="{{group}}">
-              {% for option in options %}
-                <option>{{option}}</option>
-              {% endfor %}
-            </optgroup>
-          {% endfor %}
-        </select>
-        {{field.errors}}
-      </div>
-    {% endwith %}
-    <div>
-      {{ form.args.label_tag }}
-      {{ form.args }}
-      {{ form.args.errors }}
-    </div>
+    <div style="display: inline-flex; flex-direction: column;">
+      {% for field in form %}
+        {% if field.name == "command" %}
+          <div>
+          {{field.label_tag}}
+          <select
+            name="{{field.name}}"
+            id="{{field.id_for_label}}"
+            {% if field.field.required %}required{% endif %}
+            onchange="this.form.querySelector('#{{form.usage.id_for_label}}').value = this.selectedOptions[0].dataset.helpText;"
+          >
+            <option value="" data-help-text="">Choose a command</option>
+            {% for group,options in field.optgroups.items %}
+              <optgroup label="{{group}}">
+                {% for option,help_text in options %}
+                  <option data-help-text="{{help_text}}">{{option}}</option>
+                {% endfor %}
+              </optgroup>
+            {% endfor %}
+          </select>
+          {{field.errors}}
+        </div>
+        {% else %}
+        <div style="display: inline-flex;align-items: center;">
+          {{ field.label_tag }}
+          {{ field }}
+        </div>
+        {{ field.errors }}
+        {% endif %}
+      {% endfor %}
     <input type="submit" value="Run Command" class="default">
   </form>
   <p><a href="../">Back</a></p>
