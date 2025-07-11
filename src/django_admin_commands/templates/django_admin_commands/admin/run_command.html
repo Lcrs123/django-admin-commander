@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h1>Run Management Command</h1>
+  <form method="post">{% csrf_token %}
+    {% with field=form.command %}
+    <div style="display: inline-grid;">
+      <div>
+        {{field.label_tag}}
+        <select name="{{field.name}}" id="{{field.id_for_label}}" {% if field.field.required %}required{% endif %}>
+          <option value="">Choose a command</option>
+          {% for group,options in field.optgroups.items %}
+            <optgroup label="{{group}}">
+              {% for option in options %}
+                <option>{{option}}</option>
+              {% endfor %}
+            </optgroup>
+          {% endfor %}
+        </select>
+        {{field.errors}}
+      </div>
+    {% endwith %}
+    <div>
+      {{ form.args.label_tag }}
+      {{ form.args }}
+      {{ form.args.errors }}
+    </div>
+    <input type="submit" value="Run Command" class="default">
+  </form>
+  <p><a href="../">Back</a></p>
+{% endblock %}
