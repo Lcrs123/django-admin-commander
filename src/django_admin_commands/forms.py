@@ -11,6 +11,8 @@ def get_valid_command_choices(
 ) -> list[tuple[AppName, CommandName]]:
     """Returns a list of tuples with two strings, the app and respective command name, with the commands defined in the settings that are actually in the registered with django.
 
+    Will return the actual command names for apps with commands set to '__all__' in the settings.
+
     Args:
         admin_commands (AdminCommandsSetting, optional): The dict with the settings value. Defaults to get_admin_commands().
 
@@ -18,6 +20,12 @@ def get_valid_command_choices(
         list[tuple[AppName, CommandName]]: A list of tuples with two strings, the app and respective command name,
     """
     all_commands_to_apps = get_commands()
+    choice_mapping:dict[AppName, list[str]] =  {app: [] for app, _ in admin_commands if app in all_commands_to_apps.values()}
+    for command, app in all_commands_to_apps.items():
+        if app in admin_commands and (
+            admin_commands[app] == "__all__" or command in admin_commands[app]
+        ):
+            choice_mapping[app].append(command)
     choices: list[tuple[AppName, CommandName]] = []
     for command, app in all_commands_to_apps.items():
         if app in admin_commands and (
@@ -36,9 +44,13 @@ for app, command in VALID_COMMAND_CHOICES:
     OPT_GROUPS[app].append(command)
 
 
+class GroupedChoiceField(forms.ChoiceField):
+    optgroups: dict[AppName, list[CommandName]]
+
+
 class CommandForm(forms.Form):
     """Form for the admin run command view template"""
-    command = forms.ChoiceField(
+    command = GroupedChoiceField(
         choices=[(command, command) for _, command in VALID_COMMAND_CHOICES],
         required=True,
     )
@@ -53,4 +65,5 @@ class CommandForm(forms.Form):
             optgroups (dict[AppName, list[str]], optional): Mapping from App to list of enabled commands. Defaults to OPT_GROUPS.
         """
         super().__init__(*args, **kwargs)
+        # self.command.optgroups = deepcopy(optgroups)
         self["command"].optgroups = deepcopy(optgroups) # Deepcopy just to be sure and prevent any django strangeness from accidentally messing with the original dict in successive instantiations.
