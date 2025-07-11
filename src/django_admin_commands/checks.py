@@ -7,7 +7,7 @@ from .utils import get_admin_commands
 
 
 class AppNotFoundError(Error):
-    def __init__(self, app_name: str, id: str = "commands.E001") -> None:
+    def __init__(self, app_name: str, id: str = "django_admin_commands.E001") -> None:
         super().__init__(
             f"App '{app_name}' is not in INSTALLED_APPS",
             hint="The app name should be one of those in INSTALLED_APPS or 'django.core' for the django default commands",
@@ -17,7 +17,7 @@ class AppNotFoundError(Error):
 
 class CommandNotFoundError(Error):
     def __init__(
-        self, app_name: str, command_name: str, id: str = "commands.E002"
+        self, app_name: str, command_name: str, id: str = "django_admin_commands.E002"
     ) -> None:
         super().__init__(
             f"Command '{command_name}' not found for app '{app_name}'",
@@ -27,7 +27,7 @@ class CommandNotFoundError(Error):
 
 
 class NoCommandsFoundWarning(Warning):
-    def __init__(self, app_name: str, id: str = "commands.W001") -> None:
+    def __init__(self, app_name: str, id: str = "django_admin_commands.W001") -> None:
         super().__init__(
             f"The config for App '{app_name}' is set to '__all__' but no commands were found for the app",
             id=id,
@@ -35,7 +35,7 @@ class NoCommandsFoundWarning(Warning):
 
 
 class ConfigNotSetWarning(Warning):
-    def __init__(self, id: str = "commands.W002") -> None:
+    def __init__(self, id: str = "django_admin_commands.W002") -> None:
         super().__init__(
             f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is not set. No commands will be shown.",
             hint=ADMIN_COMMANDS_SETTINGS_HINT,
