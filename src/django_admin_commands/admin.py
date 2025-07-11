@@ -35,7 +35,7 @@ class CommandAdmin(ModelAdmin):
                 args = form.cleaned_data["args"].split()
                 output = io.StringIO()
                 try:
-                    call_command(command, *args, stdout=output)
+                    call_command(command, *args, stdout=output, stderr=output)
                     add_message(request, 20, f"Command output:\n{output.getvalue()}")
                     LogEntry.objects.log_action(
                         user_id=request.user.pk,
