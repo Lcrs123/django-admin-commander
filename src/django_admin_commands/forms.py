@@ -3,7 +3,12 @@ from copy import deepcopy
 from django import forms
 from django.core.management import get_commands, load_command_class
 
-from django_admin_commands.utils import AppName, CommandName, get_admin_commands_setting, AdminCommandsSetting
+from django_admin_commands.utils import (
+    AppName,
+    CommandName,
+    get_admin_commands_setting,
+    AdminCommandsSetting,
+)
 from django_admin_commands.models import DummyCommandModel
 from typing import TypeAlias
 
@@ -46,11 +51,19 @@ for app, command in VALID_COMMAND_CHOICES:
 
 class CommandForm(forms.Form):
     """Form for the admin run command view template"""
+
     title = DummyCommandModel._meta.verbose_name
 
     command = forms.ChoiceField(
         choices=[(command, command) for _, command in VALID_COMMAND_CHOICES],
         required=True,
+    )
+    args = forms.CharField(label="Arguments (optional)", required=False)
+    stdin = forms.CharField(
+        label="User input (optional)",
+        empty_value="",
+        required=False,
+        help_text="If the command requires user input, the values here will be sent to it when prompted",
     )
     usage = forms.CharField(
         label="Usage",
@@ -64,7 +77,6 @@ class CommandForm(forms.Form):
             }
         ),
     )
-    args = forms.CharField(label="Arguments (optional)", required=False)
 
     def __init__(
         self,
