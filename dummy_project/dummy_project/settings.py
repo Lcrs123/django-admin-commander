@@ -126,4 +126,23 @@ ADMIN_COMMANDS = {
     "django.contrib.staticfiles": "__all__",
     "django.core": "__all__",
     "django.contrib.sessions": "__all__",
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[{asctime}] [{levelname}] {message}",
+            "style": "{",
+            "datefmt": "%d/%b/%Y %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "root": {"handlers": ["console"], "level": "DEBUG"},
+    },
 }
