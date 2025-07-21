@@ -3,14 +3,14 @@ from copy import deepcopy
 from django import forms
 from django.core.management import get_commands, load_command_class
 
-from .utils import AppName, CommandName, get_admin_commands, AdminCommandsSetting
+from django_admin_commands.utils import AppName, CommandName, get_admin_commands_setting, AdminCommandsSetting
 from typing import TypeAlias
 
 CommandUsage: TypeAlias = str
 
 
 def get_valid_command_choices(
-    admin_commands: AdminCommandsSetting = get_admin_commands(),
+    admin_commands: AdminCommandsSetting = get_admin_commands_setting(),
 ) -> list[tuple[AppName, CommandName]]:
     """Returns a list of tuples with two strings, the app and respective command name, with the commands defined in the settings that are actually in the registered with django.
 

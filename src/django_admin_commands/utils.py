@@ -32,7 +32,7 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
 
 
 @lru_cache(maxsize=None)
-def get_admin_commands(
+def get_admin_commands_setting(
     settings: LazySettings = settings,
     admin_commands_settings_name: str = ADMIN_COMMANDS_SETTINGS_NAME,
 ) -> AdminCommandsSetting:
@@ -41,14 +41,14 @@ def get_admin_commands(
     Caches and returns the cached value after the first run
 
     Args:
-        settings (LazySettings, optional): The django lazy settings proxy that points to the project settings. Defaults to settings.
+        settings (LazySettings, optional): The django lazy settings proxy that points to the project settings as defined in DJANGO_SETTINGS_MODULE. Defaults to settings.
         admin_commands_settings_name (str, optional): The expected settings name for django-admin-commands. Defaults to ADMIN_COMMANDS_SETTINGS_NAME.
 
     Raises:
         CommandsImproperlyConfigured: Raises default improperly configured exception if the setting or its keys and values not of the expected types
 
     Returns:
-        dict[AppName, Commands]: A dict whose keys are strings and values are either the literal "__all__" or an iterable of strings
+        AdminCommandsSetting: A dict whose keys are strings and values are either the literal "__all__" or an iterable of strings
     """
     admin_commands = getattr(settings, admin_commands_settings_name, dict())
     if not isinstance(admin_commands, dict):
