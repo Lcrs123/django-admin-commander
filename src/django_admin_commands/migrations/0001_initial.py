@@ -4,23 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='DummyCommandModel',
+            name="DummyCommandModel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Run Management Command',
-                'permissions': [('run_management_command', 'Can run management commands')],
-                'managed': False,
-                'default_permissions': [],
+                "verbose_name": "Run Management Command",
+                "permissions": [
+                    ("run_management_command", "Can run management commands")
+                ],
+                "managed": False,
+                "default_permissions": [],
             },
         ),
     ]

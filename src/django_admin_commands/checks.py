@@ -3,7 +3,12 @@ from django.core.checks import Error, Warning, register, CheckMessage
 from django.core.management import get_commands
 
 from .utils import get_admin_commands_setting
-from .exceptions import AppNotFoundError, CommandNotFoundError, NoCommandsFoundWarning, ConfigNotSetWarning
+from .exceptions import (
+    AppNotFoundError,
+    CommandNotFoundError,
+    NoCommandsFoundWarning,
+    ConfigNotSetWarning,
+)
 
 
 @register()

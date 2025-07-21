@@ -3,6 +3,7 @@ from django.core.management import get_commands
 from .consts import ADMIN_COMMANDS_SETTINGS_HINT, ADMIN_COMMANDS_SETTINGS_NAME, APP_NAME
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 
+
 class AppNotFoundError(Error):
     def __init__(self, app_name: str, id: str = f"{APP_NAME}.E001") -> None:
         super().__init__(
@@ -39,6 +40,7 @@ class ConfigNotSetWarning(Warning):
             id=id,
         )
 
+
 class CommandsImproperlyConfigured(ImproperlyConfigured):
     """Default ImproperlyConfigured exception"""
 
@@ -55,6 +57,9 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
         """
         super().__init__(message + f"The setting current values are {setting_values}")
 
+
 class RunCommandPermissionError(PermissionDenied):
-    def __init__(self, msg:str="User does not have permission to run commands") -> None:
+    def __init__(
+        self, msg: str = "User does not have permission to run commands"
+    ) -> None:
         super().__init__(msg)
