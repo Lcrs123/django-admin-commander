@@ -13,7 +13,8 @@ from django.urls import path
 
 from .forms import CommandForm
 from .models import DummyCommandModel
-
+from .consts import APP_NAME,PERMISSION_NAME
+from .exceptions import RunCommandPermissionError
 
 class CommandAdmin(ModelAdmin):
     def get_urls(self):
@@ -28,6 +29,8 @@ class CommandAdmin(ModelAdmin):
         return custom_urls + urls
 
     def run_command_view(self, request: HttpRequest):
+        if not request.user.has_perm(f"{APP_NAME}.{PERMISSION_NAME}"):
+            raise RunCommandPermissionError()
         if request.method == "POST":
             form = CommandForm(request.POST)
             if form.is_valid():
