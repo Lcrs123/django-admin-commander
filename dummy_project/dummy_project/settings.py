@@ -126,6 +126,9 @@ ADMIN_COMMANDS = {
     "django.contrib.staticfiles": "__all__",
     "django.core": "__all__",
     "django.contrib.sessions": "__all__",
+    "django.contrib.admin": "__all__",
+}
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
