@@ -1,11 +1,10 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-  <h1>Run Management Command</h1>
+  <h1>{{form.title}}</h1>
   <form method="post">{% csrf_token %}
-    <div style="display: inline-flex; flex-direction: column;">
+    <div style="display: grid; justify-items: stretch; align-items: center; grid-template-columns: auto 1fr; text-align: end">
       {% for field in form %}
         {% if field.name == "command" %}
-          <div>
           {{field.label_tag}}
           <select
             name="{{field.name}}"
@@ -23,16 +22,13 @@
             {% endfor %}
           </select>
           {{field.errors}}
-        </div>
         {% else %}
-        <div style="display: inline-flex;align-items: center;">
           {{ field.label_tag }}
           {{ field }}
-        </div>
         {{ field.errors }}
         {% endif %}
       {% endfor %}
-    <input type="submit" value="Run Command" class="default">
+    <input style="grid-column: span 2" type="submit" value="Run Command" class="default">
   </form>
   <p><a href="../">Back</a></p>
 {% endblock %}
