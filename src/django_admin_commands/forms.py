@@ -4,6 +4,7 @@ from django import forms
 from django.core.management import get_commands, load_command_class
 
 from django_admin_commands.utils import AppName, CommandName, get_admin_commands_setting, AdminCommandsSetting
+from django_admin_commands.models import DummyCommandModel
 from typing import TypeAlias
 
 CommandUsage: TypeAlias = str
@@ -12,7 +13,7 @@ CommandUsage: TypeAlias = str
 def get_valid_command_choices(
     admin_commands: AdminCommandsSetting = get_admin_commands_setting(),
 ) -> list[tuple[AppName, CommandName]]:
-    """Returns a list of tuples with two strings, the app and respective command name, with the commands defined in the settings that are actually in the registered with django.
+    """Returns a list of tuples with two strings, the app and respective command name, with the commands defined in the settings that are actually registered with django.
 
     Will return the actual command names for apps with commands set to '__all__' in the settings.
 
@@ -45,6 +46,7 @@ for app, command in VALID_COMMAND_CHOICES:
 
 class CommandForm(forms.Form):
     """Form for the admin run command view template"""
+    title = DummyCommandModel._meta.verbose_name
 
     command = forms.ChoiceField(
         choices=[(command, command) for _, command in VALID_COMMAND_CHOICES],
