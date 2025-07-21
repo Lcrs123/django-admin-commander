@@ -83,6 +83,11 @@ class CommandAdmin(ModelAdmin):
             context,
         )
 
+    def run_command_view(
+        self,
+        request: HttpRequest,
+        default_command_args: list[str] = ["--traceback", "--no-color"],
+    ):
         if not request.user.has_perm(f"{APP_NAME}.{PERMISSION_NAME}"):
             raise RunCommandPermissionError()
         if request.method == "POST":
@@ -90,32 +95,74 @@ class CommandAdmin(ModelAdmin):
             if form.is_valid():
                 command = form.cleaned_data["command"]
                 args = form.cleaned_data["args"].split()
+                stdin = form.cleaned_data["stdin"]
+                logger.debug("Received command '%s' with args %s", command, args)
+                for arg in default_command_args:
+                    if arg not in args:
+                        args.append(arg)
+                        logger.debug("Appended arg '%s' to args", arg)
                 output = io.StringIO()
+                old_stdout = sys.stdout
+                sys.stdout = output
+                old_stdin = sys.stdin
+                sys.stdin = io.StringIO(stdin)
                 try:
                     call_command(command, *args, stdout=output, stderr=output)
                     add_message(request, 20, f"Command output:\n{output.getvalue()}")
-                    LogEntry.objects.log_action(
-                        user_id=request.user.pk,
-                        content_type_id=get_content_type_for_model(DummyCommandModel).id,
-                        object_id="",
-                        object_repr=f"Successfully executed '{command}' with args {args}",
-                        action_flag=1, # use action_flag 1 (ADDITION) to show default green '+' django icon on actions log
-                    )
-                except Exception as e:
-                    add_message(request, 30, f"Error: {e}")
-                    LogEntry.objects.log_action(
-                        user_id=request.user.pk,
-                        content_type_id=get_content_type_for_model(DummyCommandModel).id,
-                        object_id="",
-                        object_repr=f"Error running '{command}' with args {args}",
-                        action_flag=3, # use action_flag 3 (DELETION) to show default red 'X' django icon on actions log
-                    )
+                    self.log_execution_ok(request, command, args[:-2])
+                except (Exception, SystemExit) as e:
+                    if isinstance(e, SystemExit) and e.code == 0:
+                        add_message(
+                            request, 20, f"Command output:\n{output.getvalue()}"
+                        )
+                        self.log_execution_ok(request, command, args[:-2])
+                    else:
+                        add_message(request, 30, f"Error: {e}\n{output.getvalue()}")
+                        self.log_execution_error(request, command, args[:-2])
+                finally:
+                    sys.stdout = old_stdout
+                    sys.stdin = old_stdin
                 return redirect("admin:run-command")
         else:
             form = CommandForm()
         context = dict(self.admin_site.each_context(request), form=form)
         return TemplateResponse(
             request, "django_admin_commands/admin/run_command.html", context
+        )
+
+    def log_execution_ok(
+        self,
+        request: HttpRequest,
+        command_name: str,
+        args: str = "",
+        message_template: str = "Successfully executed '{command_name}' with args {args}",
+    ):
+        self.log_execution(
+            request,
+            message_template.format_map({"command_name": command_name, "args": args}),
+            1,
+        )  # use action_flag 1 (ADDITION) to show default green '+' django icon on actions log
+
+    def log_execution_error(
+        self,
+        request: HttpRequest,
+        command_name: str,
+        args: str = "",
+        message_template: str = "Error running '{command_name}' with args {args}",
+    ):
+        self.log_execution(
+            request,
+            message_template.format_map({"command_name": command_name, "args": args}),
+            3,
+        )  # use action_flag 3 (DELETION) to show default red 'X' django icon on actions log
+
+    def log_execution(self, request, message: str, action_flag: Literal[1, 3]):
+        return LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=get_content_type_for_model(self.model).id,
+            object_id="",
+            object_repr=message,
+            action_flag=action_flag,
         )
 
     def has_add_permission(self, request):
