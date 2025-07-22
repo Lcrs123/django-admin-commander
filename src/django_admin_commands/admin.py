@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class CommandAdmin(ModelAdmin):
-    object_history_template = "django_admin_commands/admin/history.html"
+    object_history_template = "django_admin_commands/admin/commands_history.html"
 
     def get_urls(self):
         urls = super().get_urls()
