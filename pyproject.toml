@@ -1,6 +1,6 @@
 [project]
 name = "django-admin-commander"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Django app to run management commands from the admin panel"
 readme = "README.md"
 authors = [
