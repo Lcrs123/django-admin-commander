@@ -50,6 +50,9 @@ Once run, the result of the execution is shown as a message on top of the screen
 
 ![command output](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/command-output-check.png?raw=True)
 
+> [!CAUTION]
+> Some commands are not suited to be run like this and may cause the response process to hang, for example, the `django.core` command `test`. It's your responsibility to enable only the commands you actually want to be able to run from the admin panel.
+
 If you click the `History` button and have the django admin view log entry [permission](#permissions) enabled explicitely or as a `superuser`, you'll be able to see all log entries for executed commands:
 
 ![history](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/history-view.png?raw=True)
@@ -63,7 +66,3 @@ Aside from the regular admin view checks, `django-admin-commander` checks if the
 If the user is not a `superuser`, it must be specifically added to allow running commands and accessing the view.
 
 For accesing the `History` view, the user must be a `superuser` or have the default django `"admin.view_logentry"` permission.
-
-### Warning
-
-Some commands are not suited to be run like this and may cause the response process or the server itself to hang, for example, the `django.core` command `test`. It's your responsibility to enable only the commands you actually want to be able to run from the admin panel.
