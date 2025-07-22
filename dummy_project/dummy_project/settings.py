@@ -124,9 +124,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ADMIN_COMMANDS = {
     "django.contrib.staticfiles": "__all__",
-    "django.core": "__all__",
+    "django.core": ["check", "diffsettings"],
     "django.contrib.sessions": "__all__",
-    "django.contrib.admin": "__all__",
 }
 
 LOGGING = {
