@@ -177,6 +177,48 @@ class CommandAdmin(ModelAdmin):
     def has_view_permission(self, request, obj=None):
         return True
 
+    def has_permission(self, request: HttpRequest, full_permission_name: str) -> bool:
+        """Check if user in request has permission with given full_permission_name
+
+        Args:
+            request (HttpRequest): _description_
+            full_permission_name (str): The full permission name to check. Usually in the format 'app_name.permission_name'
+
+        Returns:
+            bool: True if user has the permission, False otherwise
+        """
+        return request.user.has_perm(full_permission_name)
+
+    def has_run_command_permission(
+        self,
+        request: HttpRequest,
+        full_permission_name: str = f"{APP_NAME}.{PERMISSION_NAME}",
+    ) -> bool:
+        """Check if user in request has permission for running commands.
+
+        Args:
+            request (HttpRequest): _description_
+            full_permission_name (str, optional): _description_. Defaults to f"{APP_NAME}.{PERMISSION_NAME}".
+
+        Returns:
+            bool: True if user has the permission, False otherwise
+        """
+        return self.has_permission(request, full_permission_name)
+
+    def has_view_logentry_permission(
+        self, request: HttpRequest, full_permission_name: str = "admin.view_logentry"
+    ) -> bool:
+        """Check if user in request has permission for viewing log entries
+
+        Args:
+            request (HttpRequest): _description_
+            full_permission_name (str, optional): _description_. Defaults to "admin.view_logentry".
+
+        Returns:
+            bool: True if user has the permission, False otherwise
+        """
+        return self.has_permission(request, full_permission_name)
+
 
 @admin.register(DummyCommandModel)
 class Commands(CommandAdmin):
