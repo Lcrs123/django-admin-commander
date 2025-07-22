@@ -33,32 +33,32 @@ ADMIN_COMMANDS = {
 
 That's it! Now, when you access the admin panel with our custom [permission](#permissions) enabled explicitely or as a `superuser`, you'll see a section for running management commands. Commands you have tried to run will also be shown on your recent actions panel:
 
-![admin panel view](./screenshots/panel-view-history.png)
+![admin panel view](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/panel-view-history.png?raw=True)
 
 When you click `View` or `Run Management Commands`, you'll open a view where you can choose and execute the enabled commands.
 
-![run command view](./screenshots/run-command-view.png)
-![command groups](./screenshots/command-groups.png)
+![run command view](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/run-command-view.png?raw=True)
+![command groups](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/command-groups.png?raw=True)
 
 Once chosen, the command usage info is automatically shown below the `Run Command` button:
 
-![usage info](./screenshots/usage-info.png)
+![usage info](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/usage-info.png?raw=True)
 
 Any command args can be passed in the `Arguments` field. If the command expects any user input, it can be passed in the `User Input` field and will be passed to the command when prompted to.
 
 Once run, the result of the execution is shown as a message on top of the screen:
 
-![command output](./screenshots/command-output-check.png)
+![command output](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/command-output-check.png?raw=True)
 
 If you click the `History` button and have the django admin view log entry [permission](#permissions) enabled explicitely or as a `superuser`, you'll be able to see all log entries for executed commands:
 
-![history](./screenshots/history-view.png)
+![history](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/history-view.png?raw=True)
 
 ### Permissions
 
 Aside from the regular admin view checks, `django-admin-commander` checks if the user has the custom `run_management_command` permission before allowing opening the run command view or running commands:
 
-![permission](./screenshots/permission.png)
+![permission](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/permission.png?raw=True)
 
 If the user is not a `superuser`, it must be specifically added to allow running commands and accessing the view.
 
