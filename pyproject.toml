@@ -11,6 +11,9 @@ dependencies = [
     "django>=4.2",
 ]
 
+[project.urls]
+Home = "https://github.com/Lcrs123/django-admin-commander"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
