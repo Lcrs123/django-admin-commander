@@ -47,7 +47,9 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
     def __init__(
         self,
         setting_values: str,
-        message: str = f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is improperly configured. {ADMIN_COMMANDS_SETTINGS_HINT}",
+        additional_info: str = "",
+        default_message: str = f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is improperly configured.",
+        hint: str = ADMIN_COMMANDS_SETTINGS_HINT
     ) -> None:
         """ImproperlyConfigured exception with default message
 
@@ -55,7 +57,7 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
             setting_values (str): Should be the string value of the settings with the name defined in ADMIN_COMMANDS_SETTINGS_NAME
             message (str, optional): Default message for the exception. Defaults to f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is improperly configured. {ADMIN_COMMANDS_SETTINGS_HINT}".
         """
-        super().__init__(message + f"The setting current values are {setting_values}")
+        super().__init__(default_message + additional_info + f"\n\nThe setting current values are {setting_values}" + f"\n\nHINT: {hint}")
 
 
 class RunCommandPermissionDenied(PermissionDenied):
