@@ -5,4 +5,4 @@ ADMIN_COMMANDS_SETTINGS_HINT = "The setting should be a dict with keys as string
 APP_NAME = "django_admin_commands"
 """Default app name"""
 PERMISSION_NAME = "run_management_command"
-"""Default permission name"""
+"""Default permission name for running commands"""
