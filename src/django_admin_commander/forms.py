@@ -3,13 +3,13 @@ from copy import deepcopy
 from django import forms
 from django.core.management import get_commands, load_command_class
 
-from django_admin_commands.utils import (
+from django_admin_commander.utils import (
     AppName,
     CommandName,
     get_admin_commands_setting,
     AdminCommandsSetting,
 )
-from django_admin_commands.models import DummyCommandModel
+from django_admin_commander.models import DummyCommandModel
 from typing import TypeAlias
 
 CommandUsage: TypeAlias = str
