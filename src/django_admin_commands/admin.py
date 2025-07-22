@@ -21,16 +21,27 @@ from django.contrib.admin.views.main import PAGE_VAR
 from .forms import CommandForm
 from .models import DummyCommandModel
 from .consts import APP_NAME, PERMISSION_NAME
-from .exceptions import RunCommandPermissionError
+from .exceptions import RunCommandPermissionDenied, ViewHistoryPermissionDenied
+
+from django.urls.resolvers import URLPattern
 
 
 logger = logging.getLogger(__name__)
 
 
 class CommandAdmin(ModelAdmin):
+    """Customized ModelAdmin for running management commands from the admin panel"""
+
     object_history_template = "django_admin_commands/admin/commands_history.html"
 
-    def get_urls(self):
+    def get_urls(self) -> list[URLPattern]:
+        """Adds the run-command and admin-commands-history views to the modeladmin urls and returns the list of urlpatterns.
+
+        The added views are wrapped in 'self.admin_site.admin_view' and treated as admin views, meaning by default they are never cached and only allow active staff users to acces the view.
+
+        Returns:
+            list[URLPattern]: _description_
+        """
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -44,11 +55,32 @@ class CommandAdmin(ModelAdmin):
                 name="admin-commands-history",
             ),
         ]
-        return custom_urls + urls
+        return (
+            custom_urls + urls
+        )  # Keep the custom_urls before default ones, as suggested in the django docs (https://docs.djangoproject.com/en/5.2/ref/contrib/admin/#django.contrib.admin.ModelAdmin.get_urls).
 
     def history_view(
         self, request: HttpRequest, object_id: str = "", extra_context: None = None
     ) -> HttpResponse:
+        """View for the execution history.
+
+        Mostly copied from the default history_view method from the ModelAdmin class
+        and adapted for the fact that there is no saved object, since we use a dummy
+        unmanaged model.
+
+        Args:
+            request (HttpRequest): _description_
+            object_id (str, optional): _description_. Defaults to "".
+            extra_context (None, optional): _description_. Defaults to None.
+
+        Raises:
+            ViewHistoryPermissionDenied: Raises PermissionDenied if the user does not have permission to view log entries.
+
+        Returns:
+            HttpResponse: _description_
+        """
+        if not self.has_view_logentry_permission(request):
+            raise ViewHistoryPermissionDenied()
         model = self.model
         action_list = (
             LogEntry.objects.filter(
@@ -87,41 +119,73 @@ class CommandAdmin(ModelAdmin):
         self,
         request: HttpRequest,
         default_command_args: list[str] = ["--traceback", "--no-color"],
-    ):
-        if not request.user.has_perm(f"{APP_NAME}.{PERMISSION_NAME}"):
-            raise RunCommandPermissionError()
+    ) -> HttpResponse:
+        """View for running commands. Requires the user to have the run commands permission.
+
+        Args:
+            request (HttpRequest): _description_
+            default_command_args (list[str], optional): Automatically added to command args if not already present. '--no-color' prevents unicode errors in the message shown to the user after execution. '--traceback' ensures full error message for the user. Defaults to ["--traceback", "--no-color"].
+
+        Raises:
+            RunCommandPermissionDenied: Raises PermissionDenied if user does not has permission for running commands.
+
+        Returns:
+            HttpResponse: _description_
+        """
+        if not self.has_run_command_permission(request):
+            raise RunCommandPermissionDenied()
         if request.method == "POST":
             form = CommandForm(request.POST)
             if form.is_valid():
                 command = form.cleaned_data["command"]
                 args = form.cleaned_data["args"].split()
                 stdin = form.cleaned_data["stdin"]
-                logger.debug("Received command '%s' with args %s", command, args)
+                logger.debug(
+                    "Received command name '%s' with args '%s' and stdin '%s'",
+                    command,
+                    args,
+                    stdin,
+                )
+                final_args = list(args)
                 for arg in default_command_args:
-                    if arg not in args:
-                        args.append(arg)
-                        logger.debug("Appended arg '%s' to args", arg)
+                    if arg not in final_args:
+                        final_args.append(arg)
+                        logger.debug("Appended arg '%s' to final args", arg)
                 output = io.StringIO()
-                old_stdout = sys.stdout
-                sys.stdout = output
-                old_stdin = sys.stdin
-                sys.stdin = io.StringIO(stdin)
+                old_stdout, old_stdin = (
+                    sys.stdout,
+                    sys.stdin,
+                )  # Storing for restoring afterwards
+                sys.stdout = output  # Simply calling commands with 'stdout=output, stderr=output' was still leaving some text sent to terminal uncaptured, ex: running any command with '--version' or '--help'.
+                sys.stdin = io.StringIO(
+                    stdin
+                )  # Some commands like 'collecstatic' which expect user input will hold indefinitely if stdin is not supplied.
                 try:
-                    call_command(command, *args, stdout=output, stderr=output)
+                    logger.debug(
+                        "Calling command '%s' with args %s and stdin '%s'",
+                        command,
+                        final_args,
+                        stdin,
+                    )
+                    call_command(command, *final_args, stdout=output, stderr=output)
                     add_message(request, 20, f"Command output:\n{output.getvalue()}")
-                    self.log_execution_ok(request, command, args[:-2])
+                    self.log_execution_ok(request, command, args)
                 except (Exception, SystemExit) as e:
+                    # Some commands cause SystemExit with code 0 on successful execution depending on args.
+                    # Since they didn't actually error out, treat as successful.
                     if isinstance(e, SystemExit) and e.code == 0:
                         add_message(
                             request, 20, f"Command output:\n{output.getvalue()}"
                         )
-                        self.log_execution_ok(request, command, args[:-2])
+                        self.log_execution_ok(request, command, args)
                     else:
                         add_message(request, 30, f"Error: {e}\n{output.getvalue()}")
-                        self.log_execution_error(request, command, args[:-2])
+                        self.log_execution_error(request, command, args)
                 finally:
-                    sys.stdout = old_stdout
-                    sys.stdin = old_stdin
+                    sys.stdout, sys.stdin = (
+                        old_stdout,
+                        old_stdin,
+                    )  # Restoring original values
                 return redirect("admin:run-command")
         else:
             form = CommandForm()
@@ -135,28 +199,81 @@ class CommandAdmin(ModelAdmin):
         request: HttpRequest,
         command_name: str,
         args: str = "",
-        message_template: str = "Successfully executed '{command_name}' with args {args}",
-    ):
-        self.log_execution(
+        stdin: str = "",
+        message_template: str = "Successfully executed '{command_name}' with args {args} and stdin {stdin}",
+        action_flag: Literal[
+            1, 3
+        ] = 1,  # use action_flag 1 (ADDITION) to show default green '+' django icon on actions log
+    ) -> LogEntry:
+        """Log successful execution of command
+
+        Args:
+            request (HttpRequest): _description_
+            command_name (str): _description_
+            args (str, optional): _description_. Defaults to "".
+            message_template (str, optional): _description_. Defaults to "Successfully executed '{command_name}' with args {args}".
+            action_flag (Literal[ 1, 3 ], optional): _description_. Defaults to 1.
+
+        Returns:
+            LogEntry: _description_
+        """
+        return self.log_execution(
             request,
-            message_template.format_map({"command_name": command_name, "args": args}),
-            1,
-        )  # use action_flag 1 (ADDITION) to show default green '+' django icon on actions log
+            message_template.format_map(
+                {"command_name": command_name, "args": args, "stdin": stdin}
+            ),
+            action_flag,
+        )
 
     def log_execution_error(
         self,
         request: HttpRequest,
         command_name: str,
         args: str = "",
-        message_template: str = "Error running '{command_name}' with args {args}",
-    ):
-        self.log_execution(
-            request,
-            message_template.format_map({"command_name": command_name, "args": args}),
-            3,
-        )  # use action_flag 3 (DELETION) to show default red 'X' django icon on actions log
+        stdin: str = "",
+        message_template: str = "Error running '{command_name}' with args {args} and stdin {stdin}",
+        action_flag: Literal[
+            1, 3
+        ] = 3,  # use action_flag 3 (DELETION) to show default red 'X' django icon on actions log
+    ) -> LogEntry:
+        """Log execution of command with error
 
-    def log_execution(self, request, message: str, action_flag: Literal[1, 3]):
+        Args:
+            request (HttpRequest): _description_
+            command_name (str): _description_
+            args (str, optional): _description_. Defaults to "".
+            message_template (str, optional): _description_. Defaults to "Error running '{command_name}' with args {args}".
+            action_flag (Literal[ 1, 3 ], optional): _description_. Defaults to 3.
+
+        Returns:
+            LogEntry: _description_
+        """
+        return self.log_execution(
+            request,
+            message_template.format_map(
+                {"command_name": command_name, "args": args, "stdin": stdin}
+            ),
+            action_flag,
+        )
+
+    def log_execution(
+        self, request: HttpRequest, message: str, action_flag: Literal[1, 3]
+    ) -> LogEntry:
+        """Saves and returns a log entry with the passed message.
+
+        The object_id for the log entry is set to "", since we dont actually store anything from our dummy command model.
+
+        Args:
+            request (HttpRequest): Request with the user set
+            message (str): Message to be stored in the log entry.
+            action_flag (Literal[1, 3]): 1 is the flag for ADDITION and 3 is the flag for DELETION.
+
+        Returns:
+            LogEntry: The saved log entry.
+        """
+        assert request.user.pk is not None, (
+            "User must exist in database to be able to save log entry"
+        )
         return LogEntry.objects.log_action(
             user_id=request.user.pk,
             content_type_id=get_content_type_for_model(self.model).id,
@@ -166,15 +283,19 @@ class CommandAdmin(ModelAdmin):
         )
 
     def has_add_permission(self, request):
+        """Always returns False. Causes the "add" hyperlink to be removed from the admin panel. Overrides default method."""
         return False
 
     def has_change_permission(self, request, obj=None):
+        """Always returns False. Overrides default method."""
         return False
 
     def has_delete_permission(self, request, obj=None):
+        """Always returns False. Overrides default method."""
         return False
 
     def has_view_permission(self, request, obj=None):
+        """Always returns True. Causes the "view" hyperlink to be shown on the admin panel and makes the "Run Management Command" model verbose name clickable. Overrides default method."""
         return True
 
     def has_permission(self, request: HttpRequest, full_permission_name: str) -> bool:
