@@ -1,5 +1,6 @@
 from django.core.checks import Error, Warning
 from django.core.management import get_commands
+from django.conf import settings
 from .consts import ADMIN_COMMANDS_SETTINGS_HINT, ADMIN_COMMANDS_SETTINGS_NAME, APP_NAME
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 
@@ -8,7 +9,7 @@ class AppNotFoundError(Error):
     def __init__(self, app_name: str, id: str = f"{APP_NAME}.E001") -> None:
         super().__init__(
             f"App '{app_name}' is not in INSTALLED_APPS",
-            hint="The app name should be one of those in INSTALLED_APPS or 'django.core' for the django default commands",
+            hint=f"The app name should be one of those in INSTALLED_APPS or 'django.core' for the django default commands. Apps currently in INSTALLED_APPS are: {getattr(settings,'INSTALLED_APPS',[])}",
             id=id,
         )
 
@@ -18,8 +19,8 @@ class CommandNotFoundError(Error):
         self, app_name: str, command_name: str, id: str = f"{APP_NAME}.E002"
     ) -> None:
         super().__init__(
-            f"Command '{command_name}' not found for app '{app_name}'",
-            hint=f"Avaliable commands for app '{app_name}' are {[command for command, app in get_commands().items() if app == app_name]}",
+            f"Command named '{command_name}' not found for app '{app_name}'. The values should be a list of commands available for the app or '__all__' to enable all commands.",
+            hint=f"Available commands for app '{app_name}' are {[command for command, app in get_commands().items() if app == app_name]}",
             id=id,
         )
 
