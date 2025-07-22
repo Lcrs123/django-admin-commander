@@ -58,8 +58,15 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
         super().__init__(message + f"The setting current values are {setting_values}")
 
 
-class RunCommandPermissionError(PermissionDenied):
+class RunCommandPermissionDenied(PermissionDenied):
     def __init__(
         self, msg: str = "User does not have permission to run commands"
+    ) -> None:
+        super().__init__(msg)
+
+
+class ViewHistoryPermissionDenied(PermissionDenied):
+    def __init__(
+        self, msg: str = "User does not have permission to view execution history"
     ) -> None:
         super().__init__(msg)
