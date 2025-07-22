@@ -46,7 +46,7 @@ def get_admin_commands_setting(
                 and
                 all(isinstance(command, str) for command in command_names)
             ):
-            raise CommandsImproperlyConfigured(str(admin_commands), f"\n\nIdentified values with wrong types - key: '{app_name}', values: {[command_name for command_name in command_names if not isinstance(command_name,str)]}")
+            raise CommandsImproperlyConfigured(str(admin_commands), f"\n\nIdentified values with wrong types - key: '{app_name}', values: {command_names}")
     for app, commands in admin_commands.items():
         if commands != "__all__":
             admin_commands[app] = set(commands)
