@@ -42,7 +42,7 @@ VALID_COMMAND_CHOICES = get_valid_command_choices()
 OPT_GROUPS: dict[AppName, list[tuple[CommandName, CommandUsage]]] = {
     app: [] for app, _ in VALID_COMMAND_CHOICES
 }  # Using defaultdict does not work when iterating from template for some reason
-"""Mapping from App to list of enabled commands. Used in template to group select options with optgroup html tag"""
+"""Mapping from App to list of tuples with enabled commands and their usage information. Used in template to group select options with optgroup html tag and show usage information"""
 for app, command in VALID_COMMAND_CHOICES:
     command_class = load_command_class(app, command)
     parser = command_class.create_parser(app, command)
@@ -53,6 +53,7 @@ class CommandForm(forms.Form):
     """Form for the admin run command view template"""
 
     title = DummyCommandModel._meta.verbose_name
+    """Title used in the template for the run commands view. Accessed in templates with 'form.title'"""
 
     command = forms.ChoiceField(
         choices=[(command, command) for _, command in VALID_COMMAND_CHOICES],
@@ -65,6 +66,7 @@ class CommandForm(forms.Form):
         required=False,
         help_text="If the command requires user input, the values here will be sent to it when prompted",
     )
+    # The template expects usage to be the last field
     usage = forms.CharField(
         label="Usage",
         required=False,
@@ -84,7 +86,7 @@ class CommandForm(forms.Form):
         optgroups: dict[AppName, list[tuple[CommandName, CommandUsage]]] = OPT_GROUPS,
         **kwargs,
     ) -> None:
-        """Returns an instance of the form.
+        """Form for the admin run command view template
 
         Stores the value of optgroups in the form field 'command', which can be accessed in templates with 'form.command.optgroups'
 

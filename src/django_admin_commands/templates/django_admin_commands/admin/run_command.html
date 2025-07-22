@@ -17,30 +17,33 @@
             name="{{field.name}}"
             id="{{field.id_for_label}}"
             {% if field.field.required %}required{% endif %}
+            {% comment %} On change, sets the usage info text for the selected command and resets args and stdin values {% endcomment %}
             onchange="
-              this.form.querySelector('#{{form.usage.id_for_label}}').value = this.selectedOptions[0].dataset.helpText;
+              this.form.querySelector('#{{form.usage.id_for_label}}').value = this.selectedOptions[0].dataset.usage;
               this.form.querySelector('#{{form.args.id_for_label}}').value = '';
+              this.form.querySelector('#{{form.stdin.id_for_label}}').value = '';
               "
           >
-            <option value="" data-help-text="">Choose a command</option>
-            {% for group,options in field.optgroups.items %}
+            <option value="" data-usage="">Choose a command</option>
+            {% for group,options_and_usages in field.optgroups.items %}
               <optgroup label="{{group}}">
-                {% for option,help_text in options %}
-                  <option data-help-text="{{help_text}}">{{option}}</option>
+                {% for option,usage in options_and_usages %}
+                  {% comment %} Stores the usage info for each command to set on the usage field on select change {% endcomment %}
+                  <option data-usage="{{usage}}">{{option}}</option>
                 {% endfor %}
               </optgroup>
             {% endfor %}
           </select>
           {% if field.errors %}
-          <label></label>
-          {{ field.errors }}
+            <label></label>
+            {{ field.errors }}
           {% endif %}
         {% else %}
           {% if field.name == 'usage' %}
             <input style="grid-column: span 2" type="submit" value="Run Command" class="default">
           {% endif %}
           {{ field.label_tag }}
-          {{field}}
+          {{ field }}
           {% if field.help_text %}
             <label></label>
             <p class="help" style="text-align: justify;">{{field.help_text}}</p>
