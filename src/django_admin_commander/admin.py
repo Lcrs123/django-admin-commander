@@ -20,7 +20,7 @@ from django.contrib.admin.views.main import PAGE_VAR
 
 from .forms import CommandForm
 from .models import DummyCommandModel
-from .consts import APP_NAME, PERMISSION_NAME
+from .consts import FULL_PERMISSION_NAME
 from .exceptions import RunCommandPermissionDenied, ViewHistoryPermissionDenied
 
 from django.urls.resolvers import URLPattern
@@ -313,7 +313,7 @@ class CommandAdmin(ModelAdmin):
     def has_run_command_permission(
         self,
         request: HttpRequest,
-        full_permission_name: str = f"{APP_NAME}.{PERMISSION_NAME}",
+        full_permission_name: str = FULL_PERMISSION_NAME,
     ) -> bool:
         """Check if user in request has permission for running commands.
 
