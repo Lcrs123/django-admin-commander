@@ -139,7 +139,9 @@ class CommandAdmin(ModelAdmin):
             if form.is_valid():
                 command = form.cleaned_data["command"]
                 args = form.cleaned_data["args"].split()
-                stdin = form.cleaned_data.get("stdin", "") # The stdin field may not exist on the form. Set to "" anyway to prevent hangups when running some commands
+                stdin = form.cleaned_data.get(
+                    "stdin", ""
+                )  # The stdin field may not exist on the form. Set to "" anyway to prevent hangups when running some commands
                 logger.debug(
                     "Received command name '%s' with args '%s' and stdin '%s'",
                     command,

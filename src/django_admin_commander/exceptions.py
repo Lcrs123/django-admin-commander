@@ -9,7 +9,7 @@ class AppNotFoundError(Error):
     def __init__(self, app_name: str, id: str = f"{APP_NAME}.E001") -> None:
         super().__init__(
             f"App '{app_name}' is not in INSTALLED_APPS",
-            hint=f"The app name should be one of those in INSTALLED_APPS or 'django.core' for the django default commands. Apps currently in INSTALLED_APPS are: {getattr(settings,'INSTALLED_APPS',[])}",
+            hint=f"The app name should be one of those in INSTALLED_APPS or 'django.core' for the django default commands. Apps currently in INSTALLED_APPS are: {getattr(settings, 'INSTALLED_APPS', [])}",
             id=id,
         )
 
@@ -50,7 +50,7 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
         setting_values: str,
         additional_info: str = "",
         default_message: str = f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is improperly configured.",
-        hint: str = ADMIN_COMMANDS_SETTINGS_HINT
+        hint: str = ADMIN_COMMANDS_SETTINGS_HINT,
     ) -> None:
         """ImproperlyConfigured exception with default message
 
@@ -58,7 +58,12 @@ class CommandsImproperlyConfigured(ImproperlyConfigured):
             setting_values (str): Should be the string value of the settings with the name defined in ADMIN_COMMANDS_SETTINGS_NAME
             message (str, optional): Default message for the exception. Defaults to f"Setting '{ADMIN_COMMANDS_SETTINGS_NAME}' is improperly configured. {ADMIN_COMMANDS_SETTINGS_HINT}".
         """
-        super().__init__(default_message + additional_info + f"\n\nThe setting current values are {setting_values}" + f"\n\nHINT: {hint}")
+        super().__init__(
+            default_message
+            + additional_info
+            + f"\n\nThe setting current values are {setting_values}"
+            + f"\n\nHINT: {hint}"
+        )
 
 
 class RunCommandPermissionDenied(PermissionDenied):

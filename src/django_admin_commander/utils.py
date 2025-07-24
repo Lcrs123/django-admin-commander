@@ -4,7 +4,11 @@ from typing import Literal, TypeAlias
 
 from django.conf import LazySettings, settings
 
-from .consts import ADMIN_COMMANDS_SETTINGS_NAME, ALLOW_USER_INPUT_SETTINGS_NAME, ALLOW_USER_INPUT_SETTINGS_HINT
+from .consts import (
+    ADMIN_COMMANDS_SETTINGS_NAME,
+    ALLOW_USER_INPUT_SETTINGS_NAME,
+    ALLOW_USER_INPUT_SETTINGS_HINT,
+)
 from .exceptions import CommandsImproperlyConfigured
 
 AppName: TypeAlias = str
@@ -37,25 +41,34 @@ def get_admin_commands_setting(
     if not isinstance(admin_commands, dict):
         raise CommandsImproperlyConfigured(str(admin_commands))
     if not all(isinstance(app_name, str) for app_name in admin_commands.keys()):
-        raise CommandsImproperlyConfigured(str(admin_commands),f"\n\nIdentified keys with wrong types: {[app_name for app_name in admin_commands.keys() if not isinstance(app_name,str)]}")
+        raise CommandsImproperlyConfigured(
+            str(admin_commands),
+            f"\n\nIdentified keys with wrong types: {[app_name for app_name in admin_commands.keys() if not isinstance(app_name, str)]}",
+        )
     for app_name, command_names in admin_commands.items():
         if isinstance(command_names, str) and command_names != "__all__":
-            raise CommandsImproperlyConfigured(str(admin_commands), f"\n\nIdentified value with wrong type - key: '{app_name}', value: {command_names}")
+            raise CommandsImproperlyConfigured(
+                str(admin_commands),
+                f"\n\nIdentified value with wrong type - key: '{app_name}', value: {command_names}",
+            )
         if not (
-                isinstance(command_names, Iterable)
-                and
-                all(isinstance(command, str) for command in command_names)
-            ):
-            raise CommandsImproperlyConfigured(str(admin_commands), f"\n\nIdentified values with wrong types - key: '{app_name}', values: {command_names}")
+            isinstance(command_names, Iterable)
+            and all(isinstance(command, str) for command in command_names)
+        ):
+            raise CommandsImproperlyConfigured(
+                str(admin_commands),
+                f"\n\nIdentified values with wrong types - key: '{app_name}', values: {command_names}",
+            )
     for app, commands in admin_commands.items():
         if commands != "__all__":
             admin_commands[app] = set(commands)
     return admin_commands
 
+
 def get_allow_user_input_setting(
     settings: LazySettings = settings,
     allow_user_input_settings_name: str = ALLOW_USER_INPUT_SETTINGS_NAME,
-    default_value: bool = True
+    default_value: bool = True,
 ) -> bool:
     """Returns the value of the setting with the name defined in ALLOW_USER_INPUT_SETTINGS_NAME as a bool or the default value if not defined.
 
@@ -71,4 +84,8 @@ def get_allow_user_input_setting(
     try:
         return bool(allow_user_input)
     except:
-        CommandsImproperlyConfigured(allow_user_input, default_message=f"Setting '{ALLOW_USER_INPUT_SETTINGS_NAME}' is improperly configured.",hint=ALLOW_USER_INPUT_SETTINGS_HINT)
+        CommandsImproperlyConfigured(
+            allow_user_input,
+            default_message=f"Setting '{ALLOW_USER_INPUT_SETTINGS_NAME}' is improperly configured.",
+            hint=ALLOW_USER_INPUT_SETTINGS_HINT,
+        )

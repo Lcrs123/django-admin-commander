@@ -85,7 +85,9 @@ class CommandForm(forms.Form):
     def __init__(
         self,
         *args,
-        optgroups: dict[AppName, list[tuple[CommandName, CommandUsageInfo]]] = OPT_GROUPS,
+        optgroups: dict[
+            AppName, list[tuple[CommandName, CommandUsageInfo]]
+        ] = OPT_GROUPS,
         **kwargs,
     ) -> None:
         """Form for the admin run command view template
