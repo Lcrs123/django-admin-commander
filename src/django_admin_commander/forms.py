@@ -7,6 +7,7 @@ from django_admin_commander.utils import (
     AppName,
     CommandName,
     get_admin_commands_setting,
+    get_allow_user_input_setting,
     AdminCommandsSetting,
 )
 from django_admin_commander.models import DummyCommandModel
@@ -60,12 +61,13 @@ class CommandForm(forms.Form):
         required=True,
     )
     args = forms.CharField(label="Arguments (optional)", required=False)
-    stdin = forms.CharField(
-        label="User input (optional)",
-        empty_value="",
-        required=False,
-        help_text="If the command requires user input, the values here will be sent to it when prompted",
-    )
+    if get_allow_user_input_setting():
+        stdin = forms.CharField(
+            label="User input (optional)",
+            empty_value="",
+            required=False,
+            help_text="If the command requires user input, the values here will be sent to it when prompted",
+        )
     # The template expects usage to be the last field
     usage = forms.CharField(
         label="Usage",
