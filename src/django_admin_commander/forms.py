@@ -12,7 +12,7 @@ from django_admin_commander.utils import (
 from django_admin_commander.models import DummyCommandModel
 from typing import TypeAlias
 
-CommandUsage: TypeAlias = str
+CommandUsageInfo: TypeAlias = str
 
 
 def get_valid_command_choices(
@@ -39,9 +39,9 @@ def get_valid_command_choices(
 
 
 VALID_COMMAND_CHOICES = get_valid_command_choices()
-OPT_GROUPS: dict[AppName, list[tuple[CommandName, CommandUsage]]] = {
+OPT_GROUPS: dict[AppName, list[tuple[CommandName, CommandUsageInfo]]] = {
     app: [] for app, _ in VALID_COMMAND_CHOICES
-}  # Using defaultdict does not work when iterating from template for some reason
+}  # Using defaultdict(list) does not work when iterating from template for some reason, so we start a dict with all keys set to an empty list
 """Mapping from App to list of tuples with enabled commands and their usage information. Used in template to group select options with optgroup html tag and show usage information"""
 for app, command in VALID_COMMAND_CHOICES:
     command_class = load_command_class(app, command)
@@ -83,7 +83,7 @@ class CommandForm(forms.Form):
     def __init__(
         self,
         *args,
-        optgroups: dict[AppName, list[tuple[CommandName, CommandUsage]]] = OPT_GROUPS,
+        optgroups: dict[AppName, list[tuple[CommandName, CommandUsageInfo]]] = OPT_GROUPS,
         **kwargs,
     ) -> None:
         """Form for the admin run command view template
