@@ -4,7 +4,7 @@ from typing import Literal, TypeAlias
 
 from django.conf import LazySettings, settings
 
-from .consts import ADMIN_COMMANDS_SETTINGS_NAME
+from .consts import ADMIN_COMMANDS_SETTINGS_NAME, ALLOW_USER_INPUT_SETTINGS_NAME, ALLOW_USER_INPUT_SETTINGS_HINT
 from .exceptions import CommandsImproperlyConfigured
 
 AppName: TypeAlias = str
@@ -51,3 +51,24 @@ def get_admin_commands_setting(
         if commands != "__all__":
             admin_commands[app] = set(commands)
     return admin_commands
+
+def get_allow_user_input_setting(
+    settings: LazySettings = settings,
+    allow_user_input_settings_name: str = ALLOW_USER_INPUT_SETTINGS_NAME,
+    default_value: bool = True
+) -> bool:
+    """Returns the value of the setting with the name defined in ALLOW_USER_INPUT_SETTINGS_NAME as a bool or the default value if not defined.
+
+    Args:
+        settings (LazySettings, optional): _description_. Defaults to settings.
+        allow_user_input_settings_name (str, optional): _description_. Defaults to ALLOW_USER_INPUT_SETTINGS_NAME.
+        default_value (bool, optional): _description_. Defaults to True.
+
+    Returns:
+        bool: _description_
+    """
+    allow_user_input = getattr(settings, allow_user_input_settings_name, default_value)
+    try:
+        return bool(allow_user_input)
+    except:
+        CommandsImproperlyConfigured(allow_user_input, default_message=f"Setting '{ALLOW_USER_INPUT_SETTINGS_NAME}' is improperly configured.",hint=ALLOW_USER_INPUT_SETTINGS_HINT)
