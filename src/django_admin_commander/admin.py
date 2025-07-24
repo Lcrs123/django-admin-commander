@@ -189,7 +189,7 @@ class CommandAdmin(ModelAdmin):
                 return redirect("admin:run-command")
         else:
             form = CommandForm()
-        context = dict(self.admin_site.each_context(request), form=form)
+        context = dict(self.admin_site.each_context(request), form=form, opts=self.opts)
         return TemplateResponse(
             request, "django_admin_commands/admin/run_command.html", context
         )

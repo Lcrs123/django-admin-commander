@@ -1,10 +1,20 @@
 {% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; {{ opts.verbose_name_plural }}
+</div>
+{% endblock %}
+
 {% block content %}
   <div style="display: flex;justify-content: space-between;align-items: baseline;">
     <h1>{{form.title}}</h1>
     <ul class="object-tools">
       <li>
-        <a href="{% url 'admin:admin-commands-history' %}" class="historylink">History</a>
+        <a href="{% url 'admin:admin-commands-history' %}" class="historylink">{% translate 'History' %}</a>
       </li>
     </ul>
   </div>
