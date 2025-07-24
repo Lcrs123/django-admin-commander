@@ -122,12 +122,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-ADMIN_COMMANDS = {
-    "django.contrib.staticfiles": "__all__",
-    "django.core": ["check", "diffsettings"],
-    "django.contrib.sessions": "__all__",
-}
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -148,3 +142,11 @@ LOGGING = {
         "root": {"handlers": ["console"], "level": "DEBUG"},
     },
 }
+
+ADMIN_COMMANDS = {
+    "django.contrib.staticfiles": "__all__",
+    "django.core": ["check", "diffsettings"],
+    "django.contrib.sessions": "__all__",
+}
+
+ADMIN_COMMANDS_ALLOW_USER_INPUT = True
