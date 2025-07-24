@@ -1,6 +1,6 @@
 # django-admin-commander
 
-A Django app to run management commands from the admin panel
+A Django app to run management commands from the admin panel with actions logging and permissions.
 
 ## Installation
 
@@ -21,7 +21,7 @@ INSTALLED_APPS = [
 
 Run `python manage.py migrate` to register our dummy [command model](https://github.com/Lcrs123/django-admin-commander/blob/master/src/django_admin_commander/models.py).
 
-Now add a setting named `ADMIN_COMMANDS` to your project `settings.py`. The setting should be a dict with keys as strings with the app names you want to enable commands for and the mapped values should be either the string literal `'__all__'` to show all commands for the app or an iterable of strings with the command names to show. To enable general django commands, use the app name `django.core`, for example:
+Now add a setting named [`ADMIN_COMMANDS`](#admin_commands) to your project `settings.py`. The setting should be a dict with keys as strings with the app names you want to enable commands for and the mapped values should be either the string literal `'__all__'` to enable all commands for the app or an iterable of strings with the command names to show. To enable general django commands, use the app name `django.core`, for example:
 
 ```python
 ADMIN_COMMANDS = {
@@ -44,7 +44,12 @@ Once chosen, the command usage info is automatically shown below the `Run Comman
 
 ![usage info](https://github.com/Lcrs123/django-admin-commander/blob/master/screenshots/usage-info.png?raw=True)
 
-Any command args can be passed in the `Arguments` field. If the command expects any user input, it can be passed in the `User Input` field and will be passed to the command when prompted to.
+Any command args can be passed in the `Arguments` field.
+
+If the command expects any user input, it can be sent in the `User Input` field and it will be passed to the command when prompted to.
+
+> [!INFO]
+> If you don't want allow passing stuff to the command prompt, you can disable the `User Input` field entirely by setting [ADMIN_COMMANDS_ALLOW_USER_INPUT](#admin_commands_allow_user_input) to `False` in your project's `settings.py`
 
 Once run, the result of the execution is shown as a message on top of the screen:
 
@@ -66,3 +71,15 @@ Aside from the regular admin view checks, `django-admin-commander` checks if the
 If the user is not a `superuser`, it must be specifically added to allow running commands and accessing the view.
 
 For accesing the `History` view, the user must be a `superuser` or have the default django `"admin.view_logentry"` permission.
+
+### Settings
+
+List of possible or expected settings:
+
+#### `ADMIN_COMMANDS`
+
+    The setting should be a dict with keys as strings with the app names and the mapped values should be either the string literal '__all__' to show all commands for the app or an iterable of strings with the command names to show. Default if not set is an empty dict.
+
+#### `ADMIN_COMMANDS_ALLOW_USER_INPUT`
+
+    Set to True to allow user input to be passed to the command stdin when/if prompted, False to disable the field. Default if not set is True.
