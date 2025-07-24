@@ -19,7 +19,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-Run `python manage.py migrate` to register our dummy [command model](./src/django_admin_commander/models.py).
+Run `python manage.py migrate` to register our dummy [command model](https://github.com/Lcrs123/django-admin-commander/blob/master/src/django_admin_commander/models.py).
 
 Now add a setting named `ADMIN_COMMANDS` to your project `settings.py`. The setting should be a dict with keys as strings with the app names you want to enable commands for and the mapped values should be either the string literal `'__all__'` to show all commands for the app or an iterable of strings with the command names to show. To enable general django commands, use the app name `django.core`, for example:
 
