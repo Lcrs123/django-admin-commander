@@ -52,7 +52,7 @@ You can pass any command arguments in the `Arguments` field.
 
 If the command expects user input, it can be provided in the `User Input` field and will be passed to the command when prompted.
 
-> [!INFO]
+> [!NOTE]
 > If you don't want to allow input to be passed to the command prompt, you can disable the `User Input` field entirely by setting [ADMIN_COMMANDS_ALLOW_USER_INPUT](#admin_commands_allow_user_input) to `False` in your project's `settings.py`.
 
 After execution, the result is displayed as a message at the top of the screen:
